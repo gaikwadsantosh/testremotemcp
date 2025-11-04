@@ -1,0 +1,25 @@
+# Core Python packages
+asyncio
+requests
+sqlite3
+
+# FastAPI + server dependencies
+fastapi
+uvicorn
+python-multipart
+pydantic
+
+# CORS middleware for FastAPI
+starlette
+
+# Streamlit frontend
+streamlit
+
+# Google Gemini client
+google-genai
+
+# FastMCP (for Model Context Protocol client)
+fastmcp
+
+# Optional (recommended for consistent date/time behavior)
+python-dateutil
