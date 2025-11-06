@@ -1,7 +1,12 @@
 import streamlit as st
 import requests
+import os
+from fastapi import HTTPException
 
-BACKEND_URL = "http://127.0.0.1:9000/interpret"
+BACKEND_URL = os.getenv("BACKEND_URL")
+if not BACKEND_URL:
+    raise HTTPException(status_code=500, detail="BACKEND_URL not set")
+#BACKEND_URL = "http://127.0.0.1:9000/interpret"
 
 st.set_page_config(page_title="AI Financial Assistant", layout="centered")
 st.title("💰 AI Financial Assistant")

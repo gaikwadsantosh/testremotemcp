@@ -6,8 +6,6 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "expenses.db")
 CATEGORIES_PATH = os.path.join(os.path.dirname(__file__), "categories.json")
 
 mcp = FastMCP("ExpenseTracker")
-#mcp = FastMCP("ExpenseTracker", expose_manifest=True)
-#mcp = FastMCP("ExpenseTracker", transport="http", host="0.0.0.0", port=8000, expose_manifest=True)
 
 def init_db():
     with sqlite3.connect(DB_PATH) as c:

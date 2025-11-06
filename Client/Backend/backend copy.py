@@ -7,7 +7,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastmcp import Client
 from google import genai
 from google.genai import types
-from contextlib import AsyncExitStack
 
 app = FastAPI()
 
@@ -75,7 +74,6 @@ async def interpret_with_gemini(user_message, tools, genai_client):
         return {"tool": None, "params": {}}
 
 
-
 @app.post("/interpret")
 async def interpret(user_input: dict):
     """Handle user input and return interpreted tool + params or tool result."""
@@ -83,75 +81,30 @@ async def interpret(user_input: dict):
     if not message:
         raise HTTPException(status_code=400, detail="Missing 'message' field")
 
-    # --- Environment Variables ---
     API_KEY = os.getenv("GOOGLE_API_KEY")
     if not API_KEY:
         raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not set")
+    genai_client = genai.Client(api_key=API_KEY)
 
     FASTMCP_URL = os.getenv("FASTMCP_URL")
-    FASTMCP_FOODCARD_URL = os.getenv("FASTMCP_FOODCARD_URL")
+    if not FASTMCP_URL:
+        raise HTTPException(status_code=500, detail="FASTMCP_URL not set")
+    client = Client(FASTMCP_URL)
 
-    # --- Initialize available clients ---
-    genai_client = genai.Client(api_key=API_KEY)
-    clients = []
-
-    if FASTMCP_URL:
-        clients.append(Client(FASTMCP_URL))
-    if FASTMCP_FOODCARD_URL:
-        clients.append(Client(FASTMCP_FOODCARD_URL))
-
-    if not clients:
-        raise HTTPException(status_code=500, detail="No MCP endpoints configured")
-
-    # --- Gather tools from all clients ---
-    all_tools = []
-    async with AsyncExitStack() as stack:
-        for c in clients:
-            await stack.enter_async_context(c)
-            try:
-                tools = await c.list_tools()
-                all_tools.extend(tools)
-            except Exception as e:
-                # Skip this client if it fails to fetch tools
-                print(f"⚠️ Warning: Failed to list tools from {c.base_url}: {e}")
-
-        # --- Interpret with Gemini ---
-        llm_result = await interpret_with_gemini(message, all_tools, genai_client)
+    async with client:
+        tools = await client.list_tools()
+        llm_result = await interpret_with_gemini(message, tools, genai_client)
         tool_name = llm_result.get("tool")
         params = llm_result.get("params", {})
 
-        if not tool_name or tool_name == "None":
-            return {"tool": None, "params": {}, "result": "No matching tool found."}
-
-        # --- Find which client has this tool ---
-        selected_client = None
-        for c in clients:
+        if tool_name and tool_name != "None":
             try:
-                tools = await c.list_tools()
-                if any(t.name == tool_name for t in tools):
-                    selected_client = c
-                    break
-            except Exception:
-                continue
-
-        if not selected_client:
-            return {"tool": tool_name, "params": params, "result": "Tool not found in any client."}
-
-        # --- Execute the selected tool ---
-        try:
-            result = await selected_client.call_tool(tool_name, params)
-            return {
-                "tool": tool_name,
-                "params": params,
-                "result": result,
-                "executed_from": getattr(selected_client, "base_url", "unknown")
-            }
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, 
-                detail=f"Error calling tool '{tool_name}' on {selected_client}: {e}"
-            )
-
+                result = await client.call_tool(tool_name, params)
+                return {"tool": tool_name, "params": params, "result": result}
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=str(e))
+        else:
+            return {"tool": None, "params": {}, "result": "No matching tool found."}
 
 if __name__ == "__main__":
     import uvicorn

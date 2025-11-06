@@ -7,16 +7,31 @@ uv run fastmcp dev server.py  -- this command will lanuch the MCP inspector, but
 Run Server (FASTMCP)
 --------------
 python server.py -- This command will run the actual server
-
+OR
+docker build -t fastmcp-expensetracker .
+docker run -p 8000:8000 fastmcp-expensetracker
 --------------
+Run Server2 (FASTMCP_2)
+--------------
+python server2.py -- This command will run the actual server
+OR
+docker build -t fastmcp-foodcardactions .
+docker run -p 8001:8001 fastmcp-foodcardactions
+--------------
+
 Run Client 
 --------------
 1. Client Backend (FASTAPI) \client\backend
-python -m uvicorn backend:app --reload --host 0.0.0.0 --port 9000
+python backend.py -- this command will fastapi which connects to server and expose to frontend
+OR
+docker build -t fastapi-client .
+docker run -p 9000:9000 -e GOOGLE_API_KEY="your_actual_api_key_here" -e FASTMCP_URL="http://host.docker.internal:8000/mcp" -e FASTMCP_FOODCARD_URL="http://host.docker.internal:8001/mcp" fastapi-client
 
 2. Client UI (STREAMLIT) \client\frontend
 streamlit run frontend.py
-
+OR 
+docker build -t streamlit-client .
+docker run -p 8501:8501 -e BACKEND_URL="http://host.docker.internal:9000/interpret" streamlit-client
 
 
 ------------------------
