@@ -3,6 +3,7 @@ import asyncio
 from dotenv import load_dotenv
 from datetime import datetime
 import json
+import os
 
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -10,13 +11,15 @@ from langchain_core.messages import ToolMessage
 
 load_dotenv()
 
+MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8000/mcp")
+
 # ------------------------------
 # MCP SERVER CONFIG
 # ------------------------------
 SERVERS = {
     "expensetracker": {
         "transport": "streamable_http",
-        "url": "http://127.0.0.1:8000/mcp",
+        "url": MCP_SERVER_URL,
     }
 }
 
