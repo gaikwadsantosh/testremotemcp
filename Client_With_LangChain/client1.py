@@ -10,11 +10,16 @@ import os
 load_dotenv()
 
 MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8000/mcp")
+MCP_SERVER_FOODCARD_URL = os.getenv("MCP_SERVER_FOODCARD_URL", "http://127.0.0.1:8001/mcp")
 
 SERVERS = {
     "expensetracker": {
         "transport": "streamable_http",
         "url": MCP_SERVER_URL,
+    },
+    "foodcard": {
+        "transport": "streamable_http",
+        "url": MCP_SERVER_FOODCARD_URL,
     }
 }
 
