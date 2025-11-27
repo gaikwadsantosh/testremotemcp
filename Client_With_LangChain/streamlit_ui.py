@@ -11,8 +11,13 @@ from langchain_core.messages import ToolMessage, SystemMessage
 
 load_dotenv()
 
+# Default MCP Server URLs
+DEFAULT_MCP_SERVER_URL = os.getenv("MCP_SERVER_URL", "http://127.0.0.1:8000/mcp")
+DEFAULT_MCP_SERVER_FOODCARD_URL = os.getenv("MCP_SERVER_FOODCARD_URL", "http://127.0.0.1:8001/mcp")
 
-
+# ------------------------------
+# Async function to process chat
+# ------------------------------
 # ------------------------------
 # Async function to process chat
 # ------------------------------
@@ -90,7 +95,9 @@ st.caption("MCP + Gemini + LangChain")
 st.sidebar.header("MCP Server Configuration")
 
 if "server_config_text" not in st.session_state:
-    st.session_state.server_config_text = ""
+    # Initialize with default values
+    default_config = f"expensetracker={DEFAULT_MCP_SERVER_URL}\nfoodcardtracker={DEFAULT_MCP_SERVER_FOODCARD_URL}"
+    st.session_state.server_config_text = default_config
 
 server_config_input = st.sidebar.text_area(
     "Enter Server Name=URL (one per line)",
