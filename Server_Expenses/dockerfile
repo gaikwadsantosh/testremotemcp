@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8000
 
 # Run the app
-CMD ["python", "server.py"]
+CMD ["python", "server_expenses.py"]

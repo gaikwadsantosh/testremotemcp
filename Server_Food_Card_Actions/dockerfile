@@ -15,4 +15,4 @@ COPY . .
 EXPOSE 8001
 
 # Run the app
-CMD ["python", "server2.py"]
+CMD ["python", "server_foodcardactions.py"]
